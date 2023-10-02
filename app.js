@@ -17,7 +17,7 @@ wss.on('connection', (ws, req) => {
       ws.send('double connection');
       return
     }
-    mac = data[2];node
+    mac = data[2];
     clients[mac] = ws;
   }
   else{
