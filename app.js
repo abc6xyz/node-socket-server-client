@@ -46,7 +46,6 @@ wss.on('connection', (ws, req) => {
         ws.send('send error')
       }
     }
-    console.log(message);
   });
 
   ws.on('close', () => {
