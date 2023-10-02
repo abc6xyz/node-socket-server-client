@@ -26,7 +26,17 @@ wss.on('connection', (ws, req) => {
   
   ws.on('message', (message) => {
     const data = JSON.parse(message.toString());
-    if(data['from'] === A_MAC) {
+    if(data['to'] === "server"){
+      if(data['command'] === 'clients'){
+        let macs = []
+        for (const key in clients) {
+          macs.push(key)
+        }
+        ws.send(JSON.stringify(macs))
+      } else {
+        ws.send("unknown command")
+      }
+    } else if(data['from'] === A_MAC) {
       if(data['to'] === A_MAC){
         for (const key in clients) {
           if (key === A_MAC) continue
