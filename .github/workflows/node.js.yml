@@ -14,17 +14,20 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [14.x, 16.x, 18.x]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
-
     steps:
-    - uses: actions/checkout@v3
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-    - run: npm ci
-    - run: node app.js
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Install Dependencies
+        run: npm install
+        
+      - name: Deploy to GitHub Pages
+        uses: gh-pages/deploy@v1
+        with:
+          remote_branch: master
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Start WebSocket Server
+        run: |
+          node app.js &
+          echo "WebSocket server started."
