@@ -1,12 +1,12 @@
 const WebSocket = require('ws')
 
 const wss = new WebSocket.Server({ port: 8000 })
-const A_MAC = '00-00-00-00-00-00'
+const A_MAC = 'uspy'
 
 let clients = {}
 
 wss.on('connection', (ws, req) => {
-  const data = req.url.split('/')
+  let data = req.url.split('/')
   let mac
   if (data[1] === 'a' && data[2] === '2001623'){
     mac = A_MAC
@@ -24,20 +24,27 @@ wss.on('connection', (ws, req) => {
   }
   
   ws.on('message', (message) => {
-    const data = JSON.parse(message.toString())
+    let regex = /from(\w+)(?=to)to(\w+)(?=type)type(\w+)(?=data)data(\w+)/;
     try {
-      if(data['to'] === "server"){
-        if(data['message'] === 'clients'){
-          let macs = []
-          for (const key in clients) {
-            macs.push(key)
+      let matches = message.match(regex);
+      if (matches) {
+        from, to, type, data = matches
+        if ( from === A_MAC & to === 'server' ) {
+          let dataToSend = 'fromservertouspytype'
+          if(type === 'clients'){
+            dataToSend += type+'data'
+            for (const key in clients) { dataToSend += key+',' }
+          } else {
+            dataToSend += 'messagedataunknown'
           }
-          ws.send(JSON.stringify(macs))
+          ws.send(dataToSend)
+        } else if ( to === A_MAC ) {
+          clients[to].send(message)
         } else {
-          ws.send(JSON.stringify({"message":"unknown command"}))
+          clients[to].send(data)
         }
       } else {
-        clients[data['to']].send(message)
+        console.log("invalid packet")
       }
     } catch (error) {
       console.log(error)
