@@ -31,9 +31,13 @@ wss.on('connection', (ws, req) => {
         from, to, type, data = matches
         if ( from === A_MAC & to === 'server' ) {
           let dataToSend = 'fromservertouspytype'
-          if(type === 'clients'){
-            dataToSend += type+'data'
-            for (const key in clients) { dataToSend += key+',' }
+          if(type === 'command'){
+            if (data === 'clients') {
+              dataToSend += data+'data'
+              for (const key in clients) { dataToSend += key+',' }
+            } else {
+              dataToSend += 'messagedataunknown'
+            }
           } else {
             dataToSend += 'messagedataunknown'
           }
