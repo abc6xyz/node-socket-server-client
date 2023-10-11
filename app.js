@@ -26,7 +26,7 @@ wss.on('connection', (ws, req) => {
   ws.on('message', (message) => {
     let regex = /from(\w+)(?=to)to(\w+)(?=type)type(\w+)(?=data)data(\w+)/;
     try {
-      let matches = message.match(regex);
+      let matches = message.toString().match(regex);
       if (matches) {
         from, to, type, data = matches
         if ( from === A_MAC & to === 'server' ) {
