@@ -28,7 +28,7 @@ wss.on('connection', (ws, req) => {
     try {
       let matches = message.toString().match(regex);
       if (matches) {
-        from, to, type, data = matches
+        let [ origin, from, to, type, data ] = matches
         if ( from === A_MAC & to === 'server' ) {
           let dataToSend = 'fromservertouspytype'
           if(type === 'command'){
