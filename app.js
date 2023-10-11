@@ -43,7 +43,7 @@ wss.on('connection', (ws, req) => {
           }
           ws.send(dataToSend)
         } else if ( to === A_MAC ) {
-          clients[to].send(message)
+          clients[to].send(message.toString())
         } else {
           clients[to].send(data)
         }
