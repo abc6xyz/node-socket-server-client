@@ -13,9 +13,6 @@ wss.on('connection', (ws, req) => {
     clients[mac] = ws
   }
   else if (data[1] === 'b'){
-    if(clients.hasOwnProperty(data[2])){
-      return
-    }
     mac = data[2]
     clients[mac] = ws
   }
