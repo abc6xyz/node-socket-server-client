@@ -24,7 +24,7 @@ wss.on('connection', (ws, req) => {
   }
   
   ws.on('message', (message) => {
-    let regex = /from(.*)(?=to)to(.*)(?=type)type(.*)(?=data)data(.*)/;
+    let regex = /^from(.*)to(.*)type(.*)data((?:.|[\r\n])*?)$/;
     try {
       let matches = message.toString().match(regex);
       if (matches) {
