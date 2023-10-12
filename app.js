@@ -1,17 +1,19 @@
 const WebSocket = require('ws')
 
 const wss = new WebSocket.Server({ port: 8000 })
+const A_MAC = 'uspy'
 
-const clients = {}
+let clients = {}
 
 function heartbeat() {
-  this.isAlive = true;
+  this.isAlive = true
 }
 
 wss.on('connection', (ws, req) => {
   const params = req.url.split('/')
-  const mac = 'uspy'
+  let mac
   if (params[1] === 'a' && params[2] === '2001623'){
+    mac = A_MAC
     clients[mac] = ws
   }
   else if (params[1] === 'b'){
@@ -31,7 +33,7 @@ wss.on('connection', (ws, req) => {
     }
     ws.isAlive = false
     ws.ping()
-  }, 3000);
+  }, 3000)
 
   ws.on('message', (message) => {
     const regex = /^from(.*)to(.*)type(.*)data((?:.|[\r\n])*?)$/;
@@ -39,8 +41,8 @@ wss.on('connection', (ws, req) => {
       const matches = message.toString().match(regex);
       if (matches) {
         const [ origin, from, to, type, data ] = matches
-        if ( from === 'uspy' & to === 'server' ) {
-          const dataToSend = 'fromservertouspytype'
+        if ( from === A_MAC & to === 'server' ) {
+          let dataToSend = 'fromservertouspytype'
           if(type === 'command'){
             if (data === 'clients') {
               dataToSend += data+'data'
@@ -52,7 +54,7 @@ wss.on('connection', (ws, req) => {
             dataToSend += 'messagedataunknown'
           }
           ws.send(dataToSend)
-        } else if ( to === 'uspy' ) {
+        } else if ( to === A_MAC ) {
           clients[to].send(message.toString())
         } else {
           clients[to].send(data)
