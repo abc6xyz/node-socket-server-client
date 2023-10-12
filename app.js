@@ -1,33 +1,46 @@
 const WebSocket = require('ws')
 
 const wss = new WebSocket.Server({ port: 8000 })
-const A_MAC = 'uspy'
 
-let clients = {}
+const clients = {}
+
+function heartbeat() {
+  this.isAlive = true;
+}
 
 wss.on('connection', (ws, req) => {
-  let data = req.url.split('/')
-  let mac
-  if (data[1] === 'a' && data[2] === '2001623'){
-    mac = A_MAC
+  const params = req.url.split('/')
+  const mac = 'uspy'
+  if (params[1] === 'a' && params[2] === '2001623'){
     clients[mac] = ws
   }
-  else if (data[1] === 'b'){
-    mac = data[2]
+  else if (params[1] === 'b'){
+    mac = params[2]
     clients[mac] = ws
   }
   else{
     ws.close()
   }
   
+  ws.isAlive = true
+  ws.on('pong', heartbeat)
+  const heartbeatInterval = setInterval(() => {
+    if (ws.isAlive === false) {
+      console.log(`Client [${mac}] disconnected (heartbeat timeout)`)
+      return ws.terminate()
+    }
+    ws.isAlive = false
+    ws.ping()
+  }, 3000);
+
   ws.on('message', (message) => {
-    let regex = /^from(.*)to(.*)type(.*)data((?:.|[\r\n])*?)$/;
+    const regex = /^from(.*)to(.*)type(.*)data((?:.|[\r\n])*?)$/;
     try {
-      let matches = message.toString().match(regex);
+      const matches = message.toString().match(regex);
       if (matches) {
-        let [ origin, from, to, type, data ] = matches
-        if ( from === A_MAC & to === 'server' ) {
-          let dataToSend = 'fromservertouspytype'
+        const [ origin, from, to, type, data ] = matches
+        if ( from === 'uspy' & to === 'server' ) {
+          const dataToSend = 'fromservertouspytype'
           if(type === 'command'){
             if (data === 'clients') {
               dataToSend += data+'data'
@@ -39,7 +52,7 @@ wss.on('connection', (ws, req) => {
             dataToSend += 'messagedataunknown'
           }
           ws.send(dataToSend)
-        } else if ( to === A_MAC ) {
+        } else if ( to === 'uspy' ) {
           clients[to].send(message.toString())
         } else {
           clients[to].send(data)
@@ -53,7 +66,7 @@ wss.on('connection', (ws, req) => {
   })
 
   ws.on('close', () => {
+    clearInterval(heartbeatInterval)
     delete(clients[mac])
-    console.log(`Client disconnected ${mac}`)
   })
 })
