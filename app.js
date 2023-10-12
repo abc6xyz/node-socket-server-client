@@ -23,6 +23,7 @@ wss.on('connection', (ws, req) => {
   else{
     ws.close()
   }
+  console.log(`Client [${mac}] connected`)
   
   ws.isAlive = true
   ws.on('pong', heartbeat)
@@ -68,6 +69,7 @@ wss.on('connection', (ws, req) => {
   })
 
   ws.on('close', () => {
+    console.log(`Client [${mac}] disconnected (onclose)`)
     clearInterval(heartbeatInterval)
     delete(clients[mac])
   })
