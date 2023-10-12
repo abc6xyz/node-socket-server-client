@@ -2,7 +2,7 @@ const WebSocket = require('ws')
 
 const wss = new WebSocket.Server({ port: 8000 })
 const A_MAC = 'uspy'
-const SERVER_URL = 'http://192.168.118.156:5000'
+const SERVER_URL = ''
 let clients = {}
 
 function heartbeat() {
