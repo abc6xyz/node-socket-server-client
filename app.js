@@ -2,7 +2,7 @@ const WebSocket = require('ws')
 
 const wss = new WebSocket.Server({ port: 8000 })
 const A_MAC = 'uspy'
-
+const SERVER_URL = ''
 let clients = {}
 
 function heartbeat() {
@@ -42,17 +42,26 @@ wss.on('connection', (ws, req) => {
       const matches = message.toString().match(regex);
       if (matches) {
         const [ origin, from, to, type, data ] = matches
-        if ( from === A_MAC & to === 'server' ) {
-          let dataToSend = 'fromservertouspytype'
-          if(type === 'command'){
-            if (data === 'clients') {
-              dataToSend += data+'data'
-              for (const key in clients) { dataToSend += key+',' }
+        if ( to === 'server' ) {
+          let dataToSend = ''
+          if ( from === A_MAC ){
+            dataToSend = 'fromservertouspytype'
+            if(type === 'command'){
+              if (data === 'clients') {
+                dataToSend += data+'data'
+                for (const key in clients) { dataToSend += key+',' }
+              } else {
+                dataToSend += 'messagedataunknown'
+              }
             } else {
               dataToSend += 'messagedataunknown'
             }
           } else {
-            dataToSend += 'messagedataunknown'
+            if( type === "command" ) {
+              if( data === "destination" ) {
+                dataToSend = SERVER_URL
+              }
+            }
           }
           ws.send(dataToSend)
         } else if ( to === A_MAC ) {
